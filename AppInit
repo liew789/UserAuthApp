@@ -1,0 +1,13 @@
+#Initialize Project Script
+
+scriptPath=$(cd `dirname $0`; pwd)
+echo 'Starting to initialize the project... Please wait...'
+
+cd ${scriptPath}
+npm install
+
+#iOS Initialize CocoaPods Library
+cd ${scriptPath}/ios
+pod install
+
+echo 'Init Done ! You can run the app now.'
