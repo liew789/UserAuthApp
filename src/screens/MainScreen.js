@@ -4,31 +4,38 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Alert
 } from 'react-native';
-import { PageContainer } from '../container/PageContainer';
+import { PageContainer } from '../components/PageContainer';
+import InfoContainer from '../components/InfoContainer';
 import { colors } from '../colorStore/Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../context/AuthContext';
 
 const MainScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { user, logout } = useUser();
 
   const handleLogout = () => {
-    logout();
-    navigation.replace('Login');
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleString();
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        onPress: () => {
+          logout();
+          navigation.replace('Login');
+        },
+      },
+    ]);
   };
 
   return (
     <PageContainer addStyle={{ paddingTop: insets.top }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Main Screen</Text>
+        <Text style={styles.headerTitle}>User Auth App</Text>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
@@ -45,29 +52,21 @@ const MainScreen = ({ navigation }) => {
         {user && (
           <View style={styles.userInfoContainer}>
             <Text style={styles.userInfoTitle}>User Information</Text>
-            <View style={styles.userInfoItem}>
-              <Text style={styles.userInfoLabel}>Name:</Text>
-              <Text style={styles.userInfoValue}>{user.name || 'N/A'}</Text>
-            </View>
-            <View style={styles.userInfoItem}>
-              <Text style={styles.userInfoLabel}>Email:</Text>
-              <Text style={styles.userInfoValue}>{user.email || 'N/A'}</Text>
-            </View>
+            <InfoContainer label="Name:" value={user.name} />
+            <InfoContainer label="Email:" value={user.email} />
             {user.loginTime && (
-              <View style={styles.userInfoItem}>
-                <Text style={styles.userInfoLabel}>Login Time:</Text>
-                <Text style={styles.userInfoValue}>
-                  {formatDate(user.loginTime)}
-                </Text>
-              </View>
+              <InfoContainer
+                label="Login Time:"
+                value={user.loginTime}
+                formatDate={true}
+              />
             )}
             {user.signUpTime && (
-              <View style={styles.userInfoItem}>
-                <Text style={styles.userInfoLabel}>Sign Up Time:</Text>
-                <Text style={styles.userInfoValue}>
-                  {formatDate(user.signUpTime)}
-                </Text>
-              </View>
+              <InfoContainer
+                label="Sign Up Time:"
+                value={user.signUpTime}
+                formatDate={true}
+              />
             )}
           </View>
         )}
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    paddingTop: "20%",
     alignItems: 'center',
     paddingHorizontal: 24,
   },
@@ -136,27 +135,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.textPrimary,
     marginBottom: 16,
-  },
-  userInfoItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  userInfoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textTertiary,
-    flex: 1,
-  },
-  userInfoValue: {
-    fontSize: 14,
-    color: colors.textPrimary,
-    flex: 2,
-    textAlign: 'right',
   },
 });
 

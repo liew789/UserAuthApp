@@ -1,116 +1,221 @@
-# UserAuthApp
+# User Auth App
+
+A React Native mobile application for user authentication with user info storage, persistent login, and a modern UI.
 
 **React Native Version:** 0.82.1
 
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+## 🏗️ Project Structure
 
-# Getting Started
+```
+UserAuthApp/
+├── src/
+│   ├── assets/              # SVG icons and assets
+│   ├── colorStore/          # Color theme configuration
+│   ├── components/          # Reusable UI components
+│   │   ├── InfoContainer.js
+│   │   ├── InputContainer.js
+│   │   ├── Loading.js
+│   │   ├── NavigationHandler.js
+│   │   ├── PageContainer.js
+│   │   └── SubmitButton.js
+│   ├── context/             # React Context for state management
+│   │   └── AuthContext.js
+│   ├── helper/              # Utility functions
+│   │   ├── Toast.js
+│   │   └── UserHelper.js
+│   ├── screens/             # App screens
+│   │   ├── LoginScreen.js
+│   │   ├── SignUpScreen.js
+│   │   └── MainScreen.js
+│   └── storage/             # AsyncStorage utilities
+│       └── InfoStore.js
+├── android/                 # Android native code
+├── ios/                     # iOS native code
+└── App.js                   # Root component
+```
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📋 Prerequisites
 
-## Step 1: Initialize the Project
+Before you begin, ensure you have the following installed:
 
-First, you need to install all dependencies (npm packages and iOS CocoaPods). Run the initialization script:
+- **Node.js** >= 20
+- **Java Development Kit (JDK) 17** or later (required for Android builds)
+- **React Native CLI**
+- **Android Studio** (for Android development)
+- **Xcode** (for iOS development, macOS only)
+- **CocoaPods** (for iOS dependencies)
 
-```sh
+### Installing Java 17 (Required for Android)
+
+If you don't have Java 17 installed:
+
+**macOS:**
+```bash
+brew install openjdk@17
+```
+
+Then add to your `~/.zshrc` or `~/.bashrc`:
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+Reload your shell:
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+Verify installation:
+```bash
+java -version  # Should show version 17 or later
+```
+
+## 🚀 Setup Instructions
+
+### Step 1: Install Dependencies
+
+Install all npm packages and iOS CocoaPods:
+
+```bash
 ./AppInit
 ```
+
+> **Note**: If you get a permission error, run:
+> ```bash
+> chmod +x AppInit
+> ```
 
 This script will:
 - Install all npm dependencies
 - Install iOS CocoaPods dependencies
 
-> **Note**: Make sure the script has execute permissions. If you get a permission error, run:
-> ```sh
-> chmod +x AppInit
-> ```
+### Step 2: Start Metro Bundler
 
-## Step 2: Start Metro
+Start the Metro bundler in one terminal:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
+```bash
 npm start
-
-# OR using Yarn
+# or
 yarn start
 ```
 
-## Step 3: Build and run your app
+### Step 3: Run the App
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+#### For Android
 
-### Android
+**Important**: Make sure you have Java 17 configured (see Prerequisites above).
 
-```sh
-# Using npm
+```bash
 npm run android
-
-# OR using Yarn
+# or
 yarn android
 ```
 
-### iOS
-
-> **Note**: If you've already run `./AppInit`, the CocoaPods dependencies are already installed. You only need to run it again if you update native dependencies.
+#### For iOS
 
 If you need to manually install CocoaPods dependencies:
 
-```sh
+```bash
 cd ios
 pod install
 cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Then run:
 
-Then run the app:
-
-```sh
-# Using npm
+```bash
 npm run ios
-
-# OR using Yarn
+# or
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 🎨 App Flow
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+1. **App Launch**: 
+   - Shows loading screen while checking AsyncStorage
+   - If user exists → Navigate to Main screen
+   - If no user → Navigate to Login screen
 
-## Step 4: Modify your app
+2. **Registration Flow**:
+   - User enters name, email, password, and confirm password
+   - Real-time validation with inline error messages
+   - Checks for duplicate emails
+   - Passwords must match
+   - On success → Navigate to Login screen
 
-Now that you have successfully run the app, let's make changes!
+3. **Login Flow**:
+   - User enters email and password
+   - Validates credentials against stored users
+   - On success → Save session and navigate to Main screen
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+4. **Main Screen**:
+   - Displays user information (name, email, login time, sign up time)
+   - Logout button with confirmation dialog
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 📱 Screens
 
-## Congratulations! :tada:
+### Login Screen
+- Email input
+- Password input with visibility toggle
+- Login button (disabled when fields are empty)
+- Link to Sign Up screen
 
-You've successfully run and modified your React Native App. :partying_face:
+### Sign Up Screen
+- Name input
+- Email input
+- Password input with visibility toggle
+- Confirm password input
+- Sign Up button (disabled when any field is empty)
+- Link to Login screen
 
-### Now what?
+### Main Screen
+- Welcome message with user's name
+- User information display:
+  - Name
+  - Email
+  - Login Time (formatted)
+  - Sign Up Time (formatted)
+- Logout button with confirmation
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## 🛠️ Troubleshooting
 
-# Troubleshooting
+### Gradle JVM Error
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+If you see "Gradle requires JVM 17 or later":
+1. Install Java 17 (see Prerequisites)
+2. Set JAVA_HOME environment variable
+3. Clean and rebuild:
+   ```bash
+   cd android
+   ./gradlew clean
+   cd ..
+   npm run android
+   ```
 
-# Learn More
+### Metro Bundler Issues
 
-To learn more about React Native, take a look at the following resources:
+If Metro bundler has issues:
+```bash
+npm start -- --reset-cache
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+### iOS Build Issues
+
+If you encounter CocoaPods issues:
+```bash
+cd ios
+pod deintegrate
+pod install
+cd ..
+```
+
+### Android Build Issues
+
+If Android build fails:
+```bash
+cd android
+./gradlew clean
+cd ..
+npm run android
+```

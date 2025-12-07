@@ -1,17 +1,16 @@
 import React from "react";
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../colorStore/Colors';
 
 export const PageContainer = props => {
 
     const { children, addStyle } = props;
-    const insets = useSafeAreaInsets();
 
     return (
         <KeyboardAvoidingView
             style={styles.keyboardAvoidingView}
-            behavior={Platform.OS === "ios" ? "padding" : null}>
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={0}>
             <View
                 style={[
                     styles.container,

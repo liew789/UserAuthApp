@@ -17,4 +17,12 @@ export const colors = {
     
     // Status colors
     error: '#FF3B30',
+    
+    // Toast colors
+    toastSuccess: '#4CAF50',
+    toastError: '#F44336',
+    toastWarning: '#FF9800',
+    toastInfo: '#2196F3',
+    toastDefault: '#333333',
+    toastText: '#FFFFFF',
 };

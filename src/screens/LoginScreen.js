@@ -4,25 +4,38 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  ScrollView,
   Dimensions,
 } from 'react-native';
-import { PageContainer } from '../container/PageContainer';
-import InputContainer from '../container/InputContainer';
+import { PageContainer } from '../components/PageContainer';
+import InputContainer from '../components/InputContainer';
+import SubmitButton from '../components/SubmitButton';
 import { colors } from '../colorStore/Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../context/AuthContext';
+import { showToast } from '../helper/Toast';
+import { validateEmail, validatePassword } from '../helper/UserHelper';
 
 const LoginScreen = ({ navigation }) => {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { height } = Dimensions.get('window');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   const insets = useSafeAreaInsets();
+  const { height } = Dimensions.get('window');
   const { login, verifyCredentials } = useUser();
+  const isButtonDisabled = !email.trim() || !password.trim();
 
   const handleLogin = () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+    
+    setEmailError(emailValidationError);
+    setPasswordError(passwordValidationError);
+
+    if (emailValidationError || passwordValidationError) {
       return;
     }
 
@@ -35,20 +48,26 @@ const LoginScreen = ({ navigation }) => {
         name: user.name,
         email: user.email,
         loginTime: new Date().toISOString(),
+        signUpTime: user.signUpTime,
       });
       navigation.replace('Main');
     } else {
-      Alert.alert('Error', 'Invalid email or password. Please try again.');
+      showToast('Invalid email or password. Please try again.');
     }
   };
 
   return (
     <PageContainer addStyle={{ paddingTop: insets.top + height * 0.1, paddingHorizontal: 24 }}>
-        <Text style={styles.title}>Welcome</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Welcome</Text>
+          <Text style={styles.subtitle}>Sign in to continue</Text>
+        </View>
 
         <View style={styles.form}>
-
           <InputContainer
             placeholder="Email"
             value={email}
@@ -56,6 +75,8 @@ const LoginScreen = ({ navigation }) => {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={254}
+            error={emailError}
           />
 
           <InputContainer
@@ -66,24 +87,32 @@ const LoginScreen = ({ navigation }) => {
             showPasswordToggle
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={128}
+            error={passwordError}
           />
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
+          <SubmitButton title="Login" onPress={handleLogin} disabled={isButtonDisabled} />
 
           <View style={styles.signUpLinkContainer}>
             <Text style={styles.signUpLinkText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={styles.signUpLinkButton}>
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
+      </ScrollView>
     </PageContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
+  header: {
+    marginBottom: 40,
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -94,29 +123,16 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: colors.textTertiary,
-    marginBottom: 40,
     textAlign: 'center',
   },
   form: {
     width: '100%',
   },
-  loginButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  loginButtonText: {
-    color: colors.textLight,
-    fontSize: 16,
-    fontWeight: '600',
-  },
   signUpLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 14,
   },
   signUpLinkText: {
     fontSize: 14,
@@ -126,6 +142,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primary,
     fontWeight: '600',
+  },
+  signUpLinkButton: {
+    paddingVertical: 10,
   },
 });
 

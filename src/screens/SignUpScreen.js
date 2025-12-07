@@ -6,12 +6,15 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  ScrollView,
 } from 'react-native';
-import { PageContainer } from '../container/PageContainer';
-import InputContainer from '../container/InputContainer';
+import { PageContainer } from '../components/PageContainer';
+import InputContainer from '../components/InputContainer';
+import SubmitButton from '../components/SubmitButton';
 import { colors } from '../colorStore/Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../context/AuthContext';
+import { validateEmail, validateName, validatePassword } from '../helper/UserHelper';
 
 const SignUpScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -20,36 +23,44 @@ const SignUpScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const { height } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
-  const { registerUser, registeredUsers } = useUser();
+  const { registerUser, checkEmailExists } = useUser();
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  const handleSignUp = () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const isButtonDisabled = !name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim();
+
+  const handleSignUp = async () => {
+    const nameValidationError = validateName(name); 
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+    const confirmPasswordValidationError = validatePassword(confirmPassword);
+
+    setNameError(nameValidationError);
+    setEmailError(emailValidationError);
+    setPasswordError(passwordValidationError);
+    setConfirmPasswordError(confirmPasswordValidationError);
+
+    if (nameValidationError || emailValidationError || passwordValidationError || confirmPasswordValidationError) {
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setConfirmPasswordError('Passwords do not match');
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
-      return;
-    }
-
-    // Check if email already exists
-    const emailExists = registeredUsers.some(
-      (user) => user.email.toLowerCase() === email.trim().toLowerCase()
-    );
+    // Check if email already exists in AsyncStorage
+    const emailExists = await checkEmailExists(email.trim());
 
     if (emailExists) {
-      Alert.alert('Error', 'This email is already registered. Please use a different email.');
+      setEmailError('This email is already registered. Please use a different email.');
       return;
     }
 
     // Register the new user in context
-    registerUser({
+    await registerUser({
       name: name.trim(),
       email: email.trim(),
       password: password.trim(),
@@ -66,16 +77,24 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <PageContainer addStyle={{ paddingTop: insets.top + height * 0.1, paddingHorizontal: 24 }}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Sign up to get started</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Sign up to get started</Text>
+        </View>
 
         <View style={styles.form}>
           <InputContainer
-            placeholder="Full Name"
+            placeholder="Name"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
             autoCorrect={false}
+            maxLength={50}
+            error={nameError}
           />
 
           <InputContainer
@@ -85,6 +104,8 @@ const SignUpScreen = ({ navigation }) => {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={254}
+            error={emailError}
           />
 
           <InputContainer
@@ -95,6 +116,8 @@ const SignUpScreen = ({ navigation }) => {
             showPasswordToggle
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={128}
+            error={passwordError}
           />
 
           <InputContainer
@@ -105,24 +128,32 @@ const SignUpScreen = ({ navigation }) => {
             showPasswordToggle
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={128}
+            error={confirmPasswordError}
           />
 
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-            <Text style={styles.signUpButtonText}>Sign Up</Text>
-          </TouchableOpacity>
+          <SubmitButton title="Sign Up" onPress={handleSignUp} disabled={isButtonDisabled} />
 
           <View style={styles.loginLinkContainer}>
             <Text style={styles.loginLinkText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginLinkButton}>
               <Text style={styles.loginLink}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>
+      </ScrollView>
     </PageContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
+  header: {
+    marginBottom: 40,
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -133,29 +164,16 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: colors.textTertiary,
-    marginBottom: 40,
     textAlign: 'center',
   },
   form: {
     width: '100%',
   },
-  signUpButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  signUpButtonText: {
-    color: colors.textLight,
-    fontSize: 16,
-    fontWeight: '600',
-  },
   loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 14,
   },
   loginLinkText: {
     fontSize: 14,
@@ -165,6 +183,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primary,
     fontWeight: '600',
+  },
+  loginLinkButton: {
+    paddingVertical: 10,
   },
 });
 
