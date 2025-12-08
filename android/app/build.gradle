@@ -92,12 +92,6 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
-    externalNativeBuild {
-        cmake {
-            path "CMakeLists.txt"
-            version "3.22.1"
-        }
-    }
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

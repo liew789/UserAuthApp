@@ -2,7 +2,10 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { colors } from '../colorStore/Colors';
 
-const SubmitButton = ({ title, onPress, disabled = false }) => {
+const SubmitButton = props => {
+
+  const { title, onPress, disabled = false } = props || {};
+
   return (
     <TouchableOpacity
       style={[styles.button, disabled && styles.buttonDisabled]}

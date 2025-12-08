@@ -17,17 +17,19 @@ import { useUser } from '../context/AuthContext';
 import { validateEmail, validateName, validatePassword } from '../helper/UserHelper';
 
 const SignUpScreen = ({ navigation }) => {
+  
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { height } = Dimensions.get('window');
-  const insets = useSafeAreaInsets();
-  const { registerUser, checkEmailExists } = useUser();
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  const { height } = Dimensions.get('window');
+  const insets = useSafeAreaInsets();
+  const { registerUser, checkEmailExists } = useUser();
 
   const isButtonDisabled = !name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim();
 

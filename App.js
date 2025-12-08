@@ -1,5 +1,4 @@
 import React from 'react';
-import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,7 +13,6 @@ const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const { user, isLoading } = useUser();
-  const isDarkMode = useColorScheme() === 'dark';
 
   if (isLoading) {
     return <Loading />;
@@ -22,7 +20,6 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <Stack.Navigator
         initialRouteName={user ? 'Main' : 'Login'}
         screenOptions={{

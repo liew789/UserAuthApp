@@ -4,12 +4,12 @@ import { colors } from '../colorStore/Colors';
 
 export const PageContainer = props => {
 
-    const { children, addStyle } = props;
+    const { children, addStyle } = props || {};
 
     return (
         <KeyboardAvoidingView
             style={styles.keyboardAvoidingView}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            //behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={0}>
             <View
                 style={[

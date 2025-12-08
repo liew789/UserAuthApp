@@ -2,11 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../colorStore/Colors';
 
-const InfoContainer = ({
-  label,
-  value,
-  formatDate = false,
-}) => {
+const InfoContainer = props => {
+
+  const { label, value, formatDate = false } = props || {};
 
   const formatDateValue = (dateString) => {
     if (!dateString) return '-';
